@@ -48,7 +48,7 @@ canvas = tk.Canvas(
     root,
     width=500,
     height=520,          # CHANGED - shorter background
-    bg="darkgreen"
+    bg="black"
 )
 canvas.pack()
 
