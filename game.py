@@ -1,470 +1,606 @@
-# FOOTBALL BRICK BREAKER
+# LEVEL 3 PYTHON GUI QUIZ
 # --------------------------------------------------------------
-# Move the platform left and right.
-# Break all the bricks, then get the ball into the goal.
-# Each level gets harder.
+# A general knowledge quiz using basic Python and Tkinter.
+# Features:
+# - Random questions
+# - Score
+# - Lives
+# - Timer
+# - Streak
+# - Difficulty
+# - Progress bar
+# - Restart button
 # --------------------------------------------------------------
 
-# 1. IMPORTS
 import tkinter as tk
+from tkinter import ttk, messagebox
 import random
 
 
-# 2. GAME VARIABLES
+# ------- Quiz questions -------
+questions = [
+    {
+        "text": "What is the capital city of France?",
+        "options": ["Paris", "Madrid", "Rome", "Berlin"],
+        "answer": "Paris",
+        "difficulty": "Easy"
+    },
+    {
+        "text": "Which planet is known as the Red Planet?",
+        "options": ["Venus", "Mars", "Jupiter", "Mercury"],
+        "answer": "Mars",
+        "difficulty": "Easy"
+    },
+    {
+        "text": "How many continents are there in the world?",
+        "options": ["5", "6", "7", "8"],
+        "answer": "7",
+        "difficulty": "Easy"
+    },
+    {
+        "text": "What is the largest ocean on Earth?",
+        "options": [
+            "Atlantic Ocean",
+            "Indian Ocean",
+            "Pacific Ocean",
+            "Arctic Ocean"
+        ],
+        "answer": "Pacific Ocean",
+        "difficulty": "Easy"
+    },
+    {
+        "text": "Which animal is the largest mammal in the world?",
+        "options": [
+            "Elephant",
+            "Giraffe",
+            "Blue Whale",
+            "Hippopotamus"
+        ],
+        "answer": "Blue Whale",
+        "difficulty": "Easy"
+    },
+    {
+        "text": "What gas do humans need to breathe?",
+        "options": [
+            "Carbon dioxide",
+            "Oxygen",
+            "Hydrogen",
+            "Nitrogen"
+        ],
+        "answer": "Oxygen",
+        "difficulty": "Easy"
+    },
+    {
+        "text": "What is the currency of Japan?",
+        "options": ["Yuan", "Won", "Yen", "Dollar"],
+        "answer": "Yen",
+        "difficulty": "Medium"
+    },
+    {
+        "text": "Who painted the Mona Lisa?",
+        "options": [
+            "Vincent van Gogh",
+            "Leonardo da Vinci",
+            "Pablo Picasso",
+            "Michelangelo"
+        ],
+        "answer": "Leonardo da Vinci",
+        "difficulty": "Medium"
+    },
+    {
+        "text": "What is the largest planet in our Solar System?",
+        "options": [
+            "Earth",
+            "Saturn",
+            "Jupiter",
+            "Neptune"
+        ],
+        "answer": "Jupiter",
+        "difficulty": "Medium"
+    },
+    {
+        "text": "Which organ pumps blood around the human body?",
+        "options": [
+            "Brain",
+            "Lungs",
+            "Heart",
+            "Liver"
+        ],
+        "answer": "Heart",
+        "difficulty": "Medium"
+    },
+    {
+        "text": "Which country is famous for the pyramids of Giza?",
+        "options": [
+            "Egypt",
+            "Greece",
+            "Mexico",
+            "Italy"
+        ],
+        "answer": "Egypt",
+        "difficulty": "Medium"
+    },
+    {
+        "text": "How many players are on the field for one soccer team?",
+        "options": ["9", "10", "11", "12"],
+        "answer": "11",
+        "difficulty": "Medium"
+    },
+    {
+        "text": "What is the hardest natural substance on Earth?",
+        "options": [
+            "Gold",
+            "Iron",
+            "Diamond",
+            "Quartz"
+        ],
+        "answer": "Diamond",
+        "difficulty": "Medium"
+    },
+    {
+        "text": "Who was the first person to walk on the Moon?",
+        "options": [
+            "Buzz Aldrin",
+            "Neil Armstrong",
+            "Yuri Gagarin",
+            "Michael Collins"
+        ],
+        "answer": "Neil Armstrong",
+        "difficulty": "Hard"
+    },
+    {
+        "text": "What is the smallest country in the world?",
+        "options": [
+            "Monaco",
+            "Vatican City",
+            "Malta",
+            "Liechtenstein"
+        ],
+        "answer": "Vatican City",
+        "difficulty": "Hard"
+    }
+]
+
+
+# ------- Game variables -------
+current_index = 0
 score = 0
 lives = 3
-level = 1
-
-ball_dx = 5
-ball_dy = -5
-
+streak = 0
+time_left = 15
 game_running = False
-goal_open = False
-
-bricks = []
-powerups = []
-
-# CHANGED - stops multiple game loops
-game_loop = None
 
 
-# 3. MAIN WINDOW
+# Shuffle questions so the game is different each time
+random.shuffle(questions)
+
+
+# ------- Create main window -------
 root = tk.Tk()
-root.title("Football Brick Breaker")
-root.geometry("600x620")  # CHANGED - shorter window
+root.title("General Knowledge Quiz")
+root.geometry("600x520")
+root.resizable(False, False)
 
 
-# 4. GAME INFORMATION
-info = tk.Label(
-    root,
-    text="Score: 0   Lives: 3   Level: 1",
-    font=("Arial", 15, "bold")
+# ------- Main frame -------
+main = ttk.Frame(root, padding=16)
+main.pack(fill="both", expand=True)
+
+
+# ------- Title -------
+title_label = ttk.Label(
+    main,
+    text="🌍 GENERAL KNOWLEDGE QUIZ",
+    font=("Segoe UI", 20, "bold")
 )
-info.pack(pady=5)
+title_label.pack(pady=(0, 10))
 
 
-# 5. GAME AREA
-canvas = tk.Canvas(
-    root,
-    width=500,
-    height=520,          # CHANGED - shorter background
-    bg="black"
+# ------- Game information -------
+info_label = ttk.Label(
+    main,
+    text=""
 )
-canvas.pack()
+info_label.pack()
 
 
-# 6. PLAYER
-player = canvas.create_rectangle(
-    210, 460, 290, 480,  # CHANGED - moved up
-    fill="blue",
-    outline="white"
+# ------- Timer -------
+timer_label = ttk.Label(
+    main,
+    text="Time: 15",
+    font=("Segoe UI", 12, "bold")
 )
+timer_label.pack(pady=5)
 
 
-# 7. BALL
-ball = canvas.create_oval(
-    240, 420, 260, 440,  # CHANGED - moved up
-    fill="white",
-    outline="black",
-    width=2
+# ------- Progress -------
+progress_label = ttk.Label(
+    main,
+    text=""
 )
+progress_label.pack()
 
-# CHANGED - adds football detail
-ball_detail = canvas.create_text(
-    250, 430,
-    text="⚽",
-    font=("Arial", 14)
+
+progress_bar = ttk.Progressbar(
+    main,
+    length=500,
+    maximum=len(questions),
+    value=0
 )
+progress_bar.pack(pady=8)
 
 
-# 8. GOAL
-goal = canvas.create_rectangle(
-    200, 490, 300, 520,  # CHANGED - moved up
-    fill="gold",
-    outline="white"
+# ------- Question -------
+question_label = ttk.Label(
+    main,
+    text="",
+    wraplength=520,
+    justify="center",
+    font=("Segoe UI", 13, "bold")
 )
+question_label.pack(pady=15)
 
-goal_text = canvas.create_text(
-    250, 505,
-    text="GOAL",
-    font=("Arial", 14, "bold")
+
+# ------- Difficulty -------
+difficulty_label = ttk.Label(
+    main,
+    text=""
 )
-
-canvas.itemconfig(goal, state="hidden")
-canvas.itemconfig(goal_text, state="hidden")
+difficulty_label.pack()
 
 
-# 9. UPDATE SCORE
+# ------- Answer area -------
+selected_answer = tk.StringVar(value="")
+
+options_frame = ttk.Frame(main)
+options_frame.pack(fill="x", pady=10)
+
+option_buttons = []
+
+
+# ------- Feedback -------
+feedback_label = ttk.Label(
+    main,
+    text="",
+    font=("Segoe UI", 11, "bold")
+)
+feedback_label.pack(pady=5)
+
+
+# ------- Buttons -------
+buttons = ttk.Frame(main)
+buttons.pack(pady=10)
+
+
+submit_btn = ttk.Button(
+    buttons,
+    text="Submit"
+)
+submit_btn.pack(side="left", padx=5)
+
+
+next_btn = ttk.Button(
+    buttons,
+    text="Next",
+    state="disabled"
+)
+next_btn.pack(side="left", padx=5)
+
+
+restart_btn = ttk.Button(
+    buttons,
+    text="Restart"
+)
+restart_btn.pack(side="left", padx=5)
+
+
+quit_btn = ttk.Button(
+    buttons,
+    text="Quit",
+    command=root.destroy
+)
+quit_btn.pack(side="left", padx=5)
+
+
+# ------- Update game information -------
 def update_info():
+    """Update the score, lives and streak."""
 
-    info.config(
-        text=f"Score: {score}   Lives: {lives}   Level: {level}"
+    hearts = "❤️" * lives
+
+    info_label.config(
+        text=f"Score: {score}    Lives: {hearts}    Streak: {streak}"
     )
 
 
-# 10. CREATE BRICKS
-def create_bricks():
+# ------- Clear old answer buttons -------
+def clear_options():
+    """Remove the old answer buttons."""
 
-    bricks.clear()
+    for button in option_buttons:
+        button.destroy()
 
-    rows = min(2 + level, 6)
-
-    for row in range(rows):
-
-        for column in range(7):
-
-            x = 35 + column * 68
-            y = 30 + row * 30  # CHANGED - slightly higher
-
-            brick = canvas.create_rectangle(
-                x, y,
-                x + 60, y + 20,
-                fill="red",
-                outline="white",   # CHANGED
-                width=2            # CHANGED
-            )
-
-            # CHANGED - brick detail
-            canvas.create_line(
-                x + 5, y + 10,
-                x + 55, y + 10,
-                fill="darkred"
-            )
-
-            bricks.append(brick)
+    option_buttons.clear()
 
 
-# 11. MOVE PLAYER
-def move_player(event):
+# ------- Load question -------
+def load_question():
+    """Display the current question."""
 
-    position = canvas.coords(player)
+    global time_left
+    global game_running
 
-    if event.keysym == "Left" and position[0] > 0:
-        canvas.move(player, -30, 0)
+    if current_index >= len(questions):
+        finish_quiz()
+        return
 
-    if event.keysym == "Right" and position[2] < 500:
-        canvas.move(player, 30, 0)
+    time_left = 15
+    game_running = True
 
+    selected_answer.set("")
+    feedback_label.config(text="")
 
-# 12. CHECK BRICKS
-def check_bricks():
+    submit_btn.config(state="normal")
+    next_btn.config(state="disabled")
 
-    global score
-    global ball_dy
+    q = questions[current_index]
 
-    ball_position = canvas.coords(ball)
-
-    for brick in bricks[:]:
-
-        brick_position = canvas.coords(brick)
-
-        if (
-            ball_position[2] >= brick_position[0]
-            and ball_position[0] <= brick_position[2]
-            and ball_position[3] >= brick_position[1]
-            and ball_position[1] <= brick_position[3]
-        ):
-
-            canvas.delete(brick)
-            bricks.remove(brick)
-
-            score += 10
-            ball_dy = -ball_dy
-
-            # Small chance of a power-up
-            if random.randint(1, 5) == 1:
-                create_powerup(
-                    brick_position[0],
-                    brick_position[1]
-                )
-
-            break
-
-
-# 13. POWER-UP
-def create_powerup(x, y):
-
-    powerup = canvas.create_oval(
-        x, y,
-        x + 15, y + 15,
-        fill="yellow",
-        outline="white"
+    # Display question
+    question_label.config(
+        text=f"Q{current_index + 1}: {q['text']}"
     )
 
-    powerups.append(powerup)
+    # Display difficulty
+    difficulty_label.config(
+        text=f"Difficulty: {q['difficulty']}"
+    )
 
+    # Display progress
+    progress_label.config(
+        text=f"Question {current_index + 1} of {len(questions)}"
+    )
 
-def move_powerups():
+    progress_bar["value"] = current_index
 
-    global lives
+    # Remove previous options
+    clear_options()
 
-    player_position = canvas.coords(player)
+    # Create new answer buttons
+    for option in q["options"]:
 
-    for powerup in powerups[:]:
+        rb = ttk.Radiobutton(
+            options_frame,
+            text=option,
+            value=option,
+            variable=selected_answer
+        )
 
-        canvas.move(powerup, 0, 4)
+        rb.pack(anchor="w", pady=3)
 
-        position = canvas.coords(powerup)
-
-        if (
-            position[2] >= player_position[0]
-            and position[0] <= player_position[2]
-            and position[3] >= player_position[1]
-            and position[1] <= player_position[3]
-        ):
-
-            canvas.delete(powerup)
-            powerups.remove(powerup)
-
-            # Power-up gives an extra life
-            lives += 1
-
-        elif position[1] > 520:  # CHANGED
-
-            canvas.delete(powerup)
-            powerups.remove(powerup)
-
-
-# 14. OPEN GOAL
-def open_goal():
-
-    global goal_open
-
-    goal_open = True
-
-    canvas.itemconfig(goal, state="normal")
-    canvas.itemconfig(goal_text, state="normal")
-
-
-# 15. NEXT LEVEL
-def next_level():
-
-    global level
-    global goal_open
-    global ball_dx
-    global ball_dy
-
-    level += 1
-    goal_open = False
-
-    canvas.itemconfig(goal, state="hidden")
-    canvas.itemconfig(goal_text, state="hidden")
-
-    create_bricks()
-
-    # Make the ball faster each level
-    ball_dx = 5 + level
-    ball_dy = -(5 + level)
-
-    # CHANGED - ball starts higher
-    canvas.coords(ball, 240, 420, 260, 440)
-    canvas.coords(ball_detail, 250, 430)
+        option_buttons.append(rb)
 
     update_info()
+    update_timer()
 
 
-# 16. MOVE BALL
-def move_ball():
+# ------- Timer -------
+def update_timer():
+    """Count down the timer."""
 
-    global ball_dx
-    global ball_dy
-    global lives
-    global game_running
-    global game_loop
+    global time_left
 
     if not game_running:
         return
 
-    canvas.move(ball, ball_dx, ball_dy)
+    timer_label.config(
+        text=f"Time: {time_left}"
+    )
 
-    # CHANGED - move football detail with ball
-    canvas.move(ball_detail, ball_dx, ball_dy)
+    if time_left > 0:
 
-    position = canvas.coords(ball)
+        time_left -= 1
 
-    # Walls
-    if position[0] <= 0 or position[2] >= 500:
-        ball_dx = -ball_dx
+        root.after(1000, update_timer)
 
-    if position[1] <= 0:
-        ball_dy = -ball_dy
+    else:
 
-    # Bricks
-    check_bricks()
-
-    # Player
-    player_position = canvas.coords(player)
-
-    if (
-        position[2] >= player_position[0]
-        and position[0] <= player_position[2]
-        and position[3] >= player_position[1]
-        and position[1] <= player_position[3]
-        and ball_dy > 0
-    ):
-
-        ball_dy = -abs(ball_dy)
+        time_out()
 
 
-    # All bricks destroyed
-    if len(bricks) == 0 and not goal_open:
-        open_goal()
+# ------- Time runs out -------
+def time_out():
+    """Remove a life when the timer reaches zero."""
 
-
-    # Goal
-    if goal_open:
-
-        goal_position = canvas.coords(goal)
-
-        if (
-            position[2] >= goal_position[0]
-            and position[0] <= goal_position[2]
-            and position[3] >= goal_position[1]
-            and position[1] <= goal_position[3]
-        ):
-            next_level()
-
-
-    # Ball missed
-    if position[1] > 520:  # CHANGED
-
-        lives -= 1
-
-        if lives <= 0:
-
-            game_running = False
-
-            canvas.create_text(
-                250, 260,
-                text="GAME OVER",
-                fill="white",
-                font=("Arial", 30, "bold")
-            )
-
-        else:
-
-            # CHANGED - reset ball and football detail
-            canvas.coords(ball, 240, 420, 260, 440)
-            canvas.coords(ball_detail, 250, 430)
-
-    move_powerups()
-    update_info()
-
-    # CHANGED - only one game loop
-    if game_running:
-        game_loop = root.after(20, move_ball)
-
-
-# 17. START GAME
-def start_game():
-
+    global lives
+    global streak
     global game_running
 
-    # CHANGED - prevents starting twice
-    if game_running:
+    if not game_running:
         return
 
-    game_running = True
+    game_running = False
 
-    create_bricks()
-    move_ball()
+    lives -= 1
+    streak = 0
+
+    feedback_label.config(
+        text="⏰ Time's up!",
+        foreground="red"
+    )
+
+    submit_btn.config(state="disabled")
+    next_btn.config(state="normal")
+
+    update_info()
+
+    if lives <= 0:
+        game_over()
 
 
-# 18. RESTART GAME
-def restart_game():
+# ------- Submit answer -------
+def submit_answer():
+    """Check the answer and update the score."""
 
     global score
     global lives
-    global level
+    global streak
     global game_running
-    global goal_open
-    global player
-    global ball
-    global ball_detail
-    global goal
-    global goal_text
-    global powerups
-    global game_loop
 
-    # CHANGED - stop old game loop
-    if game_loop:
-        root.after_cancel(game_loop)
-        game_loop = None
+    choice = selected_answer.get()
 
+    # Make sure the player selected an answer
+    if choice == "":
+        messagebox.showinfo(
+            "Select an answer",
+            "Please select one answer before submitting."
+        )
+        return
+
+    game_running = False
+
+    correct = questions[current_index]["answer"]
+
+    if choice == correct:
+
+        streak += 1
+
+        # Streak gives bonus points
+        points = 10 + (streak * 2)
+
+        score += points
+
+        feedback_label.config(
+            text=f"✅ Correct! +{points} points",
+            foreground="green"
+        )
+
+    else:
+
+        lives -= 1
+        streak = 0
+
+        feedback_label.config(
+            text=f"❌ Incorrect! Correct answer: {correct}",
+            foreground="red"
+        )
+
+    submit_btn.config(state="disabled")
+    next_btn.config(state="normal")
+
+    update_info()
+
+    if lives <= 0:
+        game_over()
+
+
+# ------- Next question -------
+def next_question():
+    """Move to the next question."""
+
+    global current_index
+
+    if lives <= 0:
+        game_over()
+        return
+
+    current_index += 1
+
+    if current_index < len(questions):
+        load_question()
+    else:
+        finish_quiz()
+
+
+# ------- Game over -------
+def game_over():
+    """End the game when the player loses all lives."""
+
+    global game_running
+
+    game_running = False
+
+    again = messagebox.askyesno(
+        "Game Over",
+        f"Game Over!\n\n"
+        f"Final Score: {score}\n\n"
+        f"Play again?"
+    )
+
+    if again:
+        restart_quiz()
+    else:
+        root.destroy()
+
+
+# ------- Finish quiz -------
+def finish_quiz():
+    """Show the player's final score."""
+
+    global game_running
+
+    game_running = False
+
+    percent = int(
+        (score / (len(questions) * 30)) * 100
+    )
+
+    if percent > 100:
+        percent = 100
+
+    again = messagebox.askyesno(
+        "Quiz Complete",
+        f"🎉 Quiz Complete!\n\n"
+        f"Score: {score}\n"
+        f"Percentage: {percent}%\n\n"
+        f"Play again?"
+    )
+
+    if again:
+        restart_quiz()
+    else:
+        root.destroy()
+
+
+# ------- Restart quiz -------
+def restart_quiz():
+    """Reset the game and start again."""
+
+    global current_index
+    global score
+    global lives
+    global streak
+    global time_left
+    global game_running
+
+    current_index = 0
     score = 0
     lives = 3
-    level = 1
+    streak = 0
+    time_left = 15
     game_running = True
-    goal_open = False
 
-    powerups.clear()  # CHANGED
+    random.shuffle(questions)
 
-    canvas.delete("all")
-
-    # Recreate player and ball
-    player = canvas.create_rectangle(
-        210, 460, 290, 480,
-        fill="blue",
-        outline="white"
-    )
-
-    ball = canvas.create_oval(
-        240, 420, 260, 440,
-        fill="white",
-        outline="black",
-        width=2
-    )
-
-    # CHANGED - recreate football detail
-    ball_detail = canvas.create_text(
-        250, 430,
-        text="⚽",
-        font=("Arial", 14)
-    )
-
-    goal = canvas.create_rectangle(
-        200, 490, 300, 520,
-        fill="gold",
-        outline="white"
-    )
-
-    goal_text = canvas.create_text(
-        250, 505,
-        text="GOAL",
-        font=("Arial", 14, "bold")
-    )
-
-    canvas.itemconfig(goal, state="hidden")
-    canvas.itemconfig(goal_text, state="hidden")
-
-    create_bricks()
-    update_info()
-    move_ball()
+    load_question()
 
 
-# 19. BUTTONS
-start_button = tk.Button(
-    root,
-    text="Start",
-    command=start_game
+# ------- Connect buttons to functions -------
+submit_btn.config(
+    command=submit_answer
 )
-start_button.pack(side="left", padx=180)
 
-restart_button = tk.Button(
-    root,
-    text="Restart",
-    command=restart_game
+next_btn.config(
+    command=next_question
 )
-restart_button.pack()
+
+restart_btn.config(
+    command=restart_quiz
+)
 
 
-# 20. CONTROLS
-root.bind("<Left>", move_player)
-root.bind("<Right>", move_player)
+# ------- Start the quiz -------
+load_question()
 
 
-# 21. START
-create_bricks()
-update_info()
-
+# ------- Start the program -------
 root.mainloop()
