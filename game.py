@@ -306,7 +306,9 @@ def move_ball():
         ball_dy = -abs(ball_dy)
 
 
-   
+    # All bricks destroyed
+    if len(bricks) == 0 and not goal_open:
+        open_goal()
 
 
     # Goal
