@@ -24,11 +24,14 @@ goal_open = False
 bricks = []
 powerups = []
 
+# CHANGED - stops multiple game loops
+game_loop = None
+
 
 # 3. MAIN WINDOW
 root = tk.Tk()
 root.title("Football Brick Breaker")
-root.geometry("600x700")
+root.geometry("600x620")  # CHANGED - shorter window
 
 
 # 4. GAME INFORMATION
@@ -44,7 +47,7 @@ info.pack(pady=5)
 canvas = tk.Canvas(
     root,
     width=500,
-    height=600,
+    height=520,          # CHANGED - shorter background
     bg="darkgreen"
 )
 canvas.pack()
@@ -52,26 +55,37 @@ canvas.pack()
 
 # 6. PLAYER
 player = canvas.create_rectangle(
-    210, 540, 290, 560,
-    fill="blue"
+    210, 460, 290, 480,  # CHANGED - moved up
+    fill="blue",
+    outline="white"
 )
 
 
 # 7. BALL
 ball = canvas.create_oval(
-    240, 500, 260, 520,
-    fill="white"
+    240, 420, 260, 440,  # CHANGED - moved up
+    fill="white",
+    outline="black",
+    width=2
+)
+
+# CHANGED - adds football detail
+ball_detail = canvas.create_text(
+    250, 430,
+    text="⚽",
+    font=("Arial", 14)
 )
 
 
 # 8. GOAL
 goal = canvas.create_rectangle(
-    200, 570, 300, 600,
-    fill="gold"
+    200, 490, 300, 520,  # CHANGED - moved up
+    fill="gold",
+    outline="white"
 )
 
 goal_text = canvas.create_text(
-    250, 585,
+    250, 505,
     text="GOAL",
     font=("Arial", 14, "bold")
 )
@@ -100,12 +114,21 @@ def create_bricks():
         for column in range(7):
 
             x = 35 + column * 68
-            y = 40 + row * 30
+            y = 30 + row * 30  # CHANGED - slightly higher
 
             brick = canvas.create_rectangle(
                 x, y,
                 x + 60, y + 20,
-                fill="red"
+                fill="red",
+                outline="white",   # CHANGED
+                width=2            # CHANGED
+            )
+
+            # CHANGED - brick detail
+            canvas.create_line(
+                x + 5, y + 10,
+                x + 55, y + 10,
+                fill="darkred"
             )
 
             bricks.append(brick)
@@ -164,7 +187,8 @@ def create_powerup(x, y):
     powerup = canvas.create_oval(
         x, y,
         x + 15, y + 15,
-        fill="yellow"
+        fill="yellow",
+        outline="white"
     )
 
     powerups.append(powerup)
@@ -195,7 +219,7 @@ def move_powerups():
             # Power-up gives an extra life
             lives += 1
 
-        elif position[1] > 600:
+        elif position[1] > 520:  # CHANGED
 
             canvas.delete(powerup)
             powerups.remove(powerup)
@@ -232,7 +256,10 @@ def next_level():
     ball_dx = 5 + level
     ball_dy = -(5 + level)
 
-    canvas.coords(ball, 240, 500, 260, 520)
+    # CHANGED - ball starts higher
+    canvas.coords(ball, 240, 420, 260, 440)
+    canvas.coords(ball_detail, 250, 430)
+
     update_info()
 
 
@@ -243,11 +270,15 @@ def move_ball():
     global ball_dy
     global lives
     global game_running
+    global game_loop
 
     if not game_running:
         return
 
     canvas.move(ball, ball_dx, ball_dy)
+
+    # CHANGED - move football detail with ball
+    canvas.move(ball_detail, ball_dx, ball_dy)
 
     position = canvas.coords(ball)
 
@@ -295,15 +326,16 @@ def move_ball():
 
 
     # Ball missed
-    if position[1] > 600:
+    if position[1] > 520:  # CHANGED
 
         lives -= 1
 
         if lives <= 0:
 
             game_running = False
+
             canvas.create_text(
-                250, 300,
+                250, 260,
                 text="GAME OVER",
                 fill="white",
                 font=("Arial", 30, "bold")
@@ -311,18 +343,26 @@ def move_ball():
 
         else:
 
-            canvas.coords(ball, 240, 500, 260, 520)
+            # CHANGED - reset ball and football detail
+            canvas.coords(ball, 240, 420, 260, 440)
+            canvas.coords(ball_detail, 250, 430)
 
     move_powerups()
     update_info()
 
-    root.after(20, move_ball)
+    # CHANGED - only one game loop
+    if game_running:
+        game_loop = root.after(20, move_ball)
 
 
 # 17. START GAME
 def start_game():
 
     global game_running
+
+    # CHANGED - prevents starting twice
+    if game_running:
+        return
 
     game_running = True
 
@@ -338,6 +378,18 @@ def restart_game():
     global level
     global game_running
     global goal_open
+    global player
+    global ball
+    global ball_detail
+    global goal
+    global goal_text
+    global powerups
+    global game_loop
+
+    # CHANGED - stop old game loop
+    if game_loop:
+        root.after_cancel(game_loop)
+        game_loop = None
 
     score = 0
     lives = 3
@@ -345,31 +397,39 @@ def restart_game():
     game_running = True
     goal_open = False
 
+    powerups.clear()  # CHANGED
+
     canvas.delete("all")
 
     # Recreate player and ball
-    global player
-    global ball
-    global goal
-    global goal_text
-
     player = canvas.create_rectangle(
-        210, 540, 290, 560,
-        fill="blue"
+        210, 460, 290, 480,
+        fill="blue",
+        outline="white"
     )
 
     ball = canvas.create_oval(
-        240, 500, 260, 520,
-        fill="white"
+        240, 420, 260, 440,
+        fill="white",
+        outline="black",
+        width=2
+    )
+
+    # CHANGED - recreate football detail
+    ball_detail = canvas.create_text(
+        250, 430,
+        text="⚽",
+        font=("Arial", 14)
     )
 
     goal = canvas.create_rectangle(
-        200, 570, 300, 600,
-        fill="gold"
+        200, 490, 300, 520,
+        fill="gold",
+        outline="white"
     )
 
     goal_text = canvas.create_text(
-        250, 585,
+        250, 505,
         text="GOAL",
         font=("Arial", 14, "bold")
     )
