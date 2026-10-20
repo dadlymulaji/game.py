@@ -1,16 +1,4 @@
-# LEVEL 3 PYTHON GUI QUIZ
-# --------------------------------------------------------------
-# A general knowledge quiz using basic Python and Tkinter.
-# Features:
-# - Random questions
-# - Score
-# - Lives
-# - Timer
-# - Streak
-# - Difficulty
-# - Progress bar
-# - Restart button
-# --------------------------------------------------------------
+
 
 import tkinter as tk
 from tkinter import ttk, messagebox
