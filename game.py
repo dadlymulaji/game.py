@@ -201,7 +201,7 @@ timer_label = ttk.Label(
 timer_label.pack(pady=5)
 
 
-# ------- Progress -------
+
 # ------- Progress bar with percentage -------
 progress_frame = ttk.Frame(main)
 progress_frame.pack(pady=8)
@@ -320,7 +320,21 @@ def clear_options():
     option_buttons.clear()
 
 
-# ------- Load question -------
+
+# ------- Animate progress percentage -------
+def animate_progress(target):
+    """Count the progress bar up to the target percentage."""
+
+    current = int(progress_bar["value"])
+
+    if current < target:
+        current += 1
+        progress_bar["value"] = current
+        percentage_label.config(text=f"{current}%")
+
+        root.after(15, lambda: animate_progress(target))
+    else:
+        percentage_label.config(text=f"{target}%")
 def load_question():
     """Display the current question."""
 
