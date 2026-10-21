@@ -245,6 +245,11 @@ difficulty_label = ttk.Label(
 )
 difficulty_label.pack()
 
+progress_label = ttk.Label(
+    main,
+    text=""
+)
+
 
 # ------- Answer area -------
 selected_answer = tk.StringVar(value="")
@@ -375,7 +380,7 @@ def load_question():
     percentage = int((current_index / len(questions)) * 100)
     animate_progress(percentage)
 
-    
+
     # Remove previous options
     clear_options()
 
