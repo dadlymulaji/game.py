@@ -164,7 +164,7 @@ random.shuffle(questions)
 
 # ------- Create main window -------
 root = tk.Tk()
-root.title("General Knowledge Quiz")
+root.title("General Knowledge")
 root.geometry("600x520")
 root.resizable(False, False)
 
