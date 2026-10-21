@@ -177,7 +177,7 @@ main.pack(fill="both", expand=True)
 # ------- Title -------
 title_label = ttk.Label(
     main,
-    text="🌍 GENERAL KNOWLEDGE QUIZ",
+    text="🌍 GENERAL KNOWLEDGE ",
     font=("Roboto UI", 20, "bold"),
     foreground="blue"
 )
