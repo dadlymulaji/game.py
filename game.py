@@ -374,6 +374,8 @@ def load_question():
    # Update progress percentage
     percentage = int((current_index / len(questions)) * 100)
     animate_progress(percentage)
+
+    
     # Remove previous options
     clear_options()
 
