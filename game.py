@@ -371,8 +371,9 @@ def load_question():
         text=f"Question {current_index + 1} of {len(questions)}"
     )
 
-    progress_bar["value"] = current_index
-
+   # Update progress percentage
+    percentage = int((current_index / len(questions)) * 100)
+    animate_progress(percentage)
     # Remove previous options
     clear_options()
 
@@ -548,7 +549,8 @@ def finish_quiz():
     """Show the player's final score."""
 
     global game_running
-
+    progress_bar["value"] = 100
+    percentage_label.config(text="100%")
     game_running = False
 
     percent = int(
