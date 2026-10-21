@@ -202,22 +202,31 @@ timer_label.pack(pady=5)
 
 
 # ------- Progress -------
-progress_label = ttk.Label(
-    main,
-    text=""
-)
-progress_label.pack()
-
+# ------- Progress bar with percentage -------
+progress_frame = ttk.Frame(main)
+progress_frame.pack(pady=8)
 
 progress_bar = ttk.Progressbar(
-    main,
+    progress_frame,
     length=500,
-    maximum=len(questions),
-    value=0
+    maximum=100,
+    value=0,
+    mode="determinate"
 )
-progress_bar.pack(pady=8)
+progress_bar.pack()
 
+# Percentage text displayed inside the bar
+percentage_label = ttk.Label(
+    progress_frame,
+    text="0%",
+    font=("Segoe UI", 10, "bold")
+)
 
+percentage_label.place(
+    relx=0.5,
+    rely=0.5,
+    anchor="center"
+)
 # ------- Question -------
 question_label = ttk.Label(
     main,
